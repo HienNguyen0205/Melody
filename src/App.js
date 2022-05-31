@@ -9,7 +9,7 @@ import About from './About'
 import Footer from './Footer'
 import './App.css'
 
-const linkApi = 'http://melody.infinityfreeapp.com'
+const linkApi = 'https://melody.infinityfreeapp.com'
 const linkGetApi = linkApi + '/getCustomer.php'
 const linkAddApi = linkApi + '/addCustomer.php'
 const linkDeleteApi = linkApi + '/deleteCustomer.php'
