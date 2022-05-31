@@ -24,7 +24,9 @@ function App(){
   const ref = useRef()
 
   useEffect(() => {
-    fetch(linkGetApi)
+    fetch(linkGetApi,{
+      mode: 'cors'
+    })
       .then(result => result.json())
       .then(result => {
         setItems(result.data)
