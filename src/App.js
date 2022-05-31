@@ -25,7 +25,8 @@ function App(){
 
   useEffect(() => {
     fetch(linkGetApi,{
-      mode: 'cors'
+      mode: 'cors',
+      credentials: 'include'
     })
       .then(result => result.json())
       .then(result => {
