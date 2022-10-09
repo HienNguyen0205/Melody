@@ -1,51 +1,63 @@
 import { useState, useEffect, memo} from 'react'
+import { db } from './db'
+import { collection, getDocs, deleteDoc, doc } from 'firebase/firestore'
 import Message from './Message'
 
-function CartModal({ticketData ,setCartModal, linkGet, linkDelete, linkUpdate}) {
+function CartModal({setCartModal}) {
     
     const [purchase, setPurchase] = useState(false)
     const [alert, setAlert] = useState({message: '', changeState: false})
     const [keyDelete, setKeyDelete] = useState({id: 0})
-    const [tickets, setTickets] = useState(ticketData)
+    const [tickets, setTickets] = useState()
+
+    async function getCart() {
+        const ref = collection(db, 'CartItems')
+        await getDocs(ref).then((response) => {
+            const cart = response.docs.map((doc) => ({
+                id: doc.id,
+                data: doc.data()
+            }))
+            console.log(cart)
+            setTickets(cart)
+        })
+        .catch((error) => console.error(error))
+    }
+
+    async function deleteCartItem() {
+        const ref = doc(db, keyDelete.id)
+        await deleteDoc(ref).then(() => {
+            handleAlert('Delete Successfully!')
+            getCart()
+        })
+        .catch((error) => console.error(error))
+    }
 
     useEffect(() => {
-        const fetchData = async () => {
-            if(keyDelete.id !== 0){
-                let response = await fetch(linkDelete, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(keyDelete)
-                })
-                let result = await response.json()
-                handleAlert(result)
-            }
-            if(purchase){
-                let response = await fetch(linkUpdate, {
-                    method: 'POST',
-                })
-                let result = await response.json()
-                handleAlert(result)
-                setPurchase(false)
-            }
-            let response = await fetch(linkGet,{
-                method: 'GET'
-            })
-            let result = await response.json()
-            console.log(result.data)
-            setTickets(result.data)
+        getCart()
+    }, [])
+
+    useEffect(() => {
+        if(keyDelete.id !== 0){
+            deleteCartItem()
         }
-        fetchData()
+        if(purchase){
+            db.collection('CartItems').get().then((snapshot) => {
+                return Promise.all(snapshot.documents.map(doc => {
+                  return doc.ref.update({isPurchase: true})
+                }))
+            })
+            handleAlert("Purchase Successfully!")
+            setPurchase(false)
+        }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [keyDelete, purchase])
+    }, [keyDelete.id, purchase])
 
     const handleDelete = id => {
         setKeyDelete({id: id})
     }
 
     const handleClose = () => {
-        setCartModal({'status': false, 'data': tickets})
+        setCartModal(false)
         setPurchase(false)
     }
 
@@ -78,13 +90,13 @@ function CartModal({ticketData ,setCartModal, linkGet, linkDelete, linkUpdate}) 
                                 </tr>
                             </thead>
                             <tbody>
-                                {Array.isArray(tickets) && tickets.map((ticket) => {
+                                {Array.isArray(tickets) && tickets.map(ticket => {
                                     return (
                                         <tr key={ticket.id}>
-                                            <td>{ticket.name}</td>
-                                            <td>{ticket.email}</td>
-                                            <td>{ticket.price}</td>
-                                            <td>{ticket.number}</td>
+                                            <td>{ticket.data.name}</td>
+                                            <td>{ticket.data.email}</td>
+                                            <td>{ticket.data.price}</td>
+                                            <td>{ticket.data.number}</td>
                                             <td>
                                                 <button type="button" className="btn btn-danger" 
                                                     onClick={() => handleDelete(ticket.id)}>

@@ -1,51 +1,44 @@
 import { useState, useEffect, memo} from 'react'
+import { collection, addDoc } from "firebase/firestore"
+import { db } from './db'
 import Message from './Message'
 
-function TicketModal({selected, handleTicketModal, linkAdd}) {
+function TicketModal({selected, handleTicketModal}) {
 
-    const [name, setName] = useState('')
-    const [email, setEmail] = useState('')
-    const [type, setType] = useState()
-    const [number, setNumber] = useState(1)
+    const [email, setEmail] = useState()
+    const [name, setName] = useState()
+    const [number, setNumber] = useState()
+    const [price, setPrice] = useState()
     const [message, setMessage] = useState({'message1': '', 'message2': ''})
     const [alert, setAlert] = useState({message: '', changeState: false})
-    const [ticketData, setTicketData] = useState()
+
+    async function addCart() {
+        const ref = collection(db, 'CartItems')
+        await addDoc(ref, {
+            email: email,
+            isPurchased: false,
+            name: name,
+            number: number,
+            price: price
+        }).then(() => {
+            setAlert({message: "Add Successfully!", changeState: false})
+        }).catch(error => console.error(error))
+    }
 
     useEffect(() => {
-        if(ticketData){
-            fetch(linkAdd, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(ticketData)
-            })
-            .then(response => response.json())
-            .then(response => {
-                if(alert.changeState){
-                    setAlert({message: response.data, changeState: false})
-                }else{
-                    setAlert({message: response.data, changeState: true})
-                }
-            })
-        }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [ticketData, linkAdd])
-
-    useEffect(() => {
-        setType(selected)
+        setPrice(selected)
     }, [selected])
 
     const handleSubmit = e => {
         let message1 = ''
         let message2 = ''
+        const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/
         e.preventDefault()
         if(!name.trim()){
             message1 = 'Please enter your name.'
         }else{
             message1 = ''
         }
-        const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/
         if (!email.trim()) {
             message2 = 'Please enter your email.'
         }else if (!email.match(emailRegex)) {
@@ -54,7 +47,7 @@ function TicketModal({selected, handleTicketModal, linkAdd}) {
             message2 = ''
         }
         if(message1 === '' && message2 === ''){
-            setTicketData({name: name, email: email, price: type, number: number, purchase: 0})
+            addCart()
             handleDelete()
         }else{
             setMessage({'message1': message1, 'message2': message2})
@@ -62,8 +55,8 @@ function TicketModal({selected, handleTicketModal, linkAdd}) {
     }
 
     const handleDelete = () => {
-        setName('')
         setEmail('')
+        setName('')
         setNumber(1)
     }
 
@@ -98,7 +91,8 @@ function TicketModal({selected, handleTicketModal, linkAdd}) {
                             </div>
                             <div className="mb-3">
                                 <label htmlFor="type">Ticket type:</label>
-                                <select id="ticket-select" className="form-select" onChange={e => setType(e.target.value)} value={type}>
+                                <select id="ticket-select" className="form-select" 
+                                    onChange={e => setPrice(e.target.value)} value={price}>
                                     <option value="999">V.I.P ticket - $999</option>
                                     <option value="799">Priority ticket - $799</option>
                                     <option value="599">Normal ticket - $599</option>
@@ -106,7 +100,8 @@ function TicketModal({selected, handleTicketModal, linkAdd}) {
                             </div>
                             <div className="mb-3">
                                 <label htmlFor="type">Number:</label>
-                                <select className="form-select" onChange={e => setNumber(e.target.value)} value={number}>
+                                <select className="form-select" 
+                                    onChange={e => setNumber(e.target.value)} value={number}>
                                     <option value="1">1</option>
                                     <option value="2">2</option>
                                     <option value="3">3</option>
