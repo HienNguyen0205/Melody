@@ -5,10 +5,10 @@ import Message from './Message'
 
 function TicketModal({selected, handleTicketModal}) {
 
-    const [email, setEmail] = useState()
-    const [name, setName] = useState()
-    const [number, setNumber] = useState()
-    const [price, setPrice] = useState()
+    const [email, setEmail] = useState('')
+    const [name, setName] = useState('')
+    const [number, setNumber] = useState(0)
+    const [price, setPrice] = useState(selected)
     const [message, setMessage] = useState({'message1': '', 'message2': ''})
     const [alert, setAlert] = useState({message: '', changeState: false})
 
@@ -21,8 +21,10 @@ function TicketModal({selected, handleTicketModal}) {
             number: number,
             price: price
         }).then(() => {
-            setAlert({message: "Add Successfully!", changeState: false})
-        }).catch(error => console.error(error))
+            setAlert({message: "Add Successfully!", changeState: alert.changeState ? false : true})
+        }).catch(() => {
+            setAlert({message: "Fail to add!", changeState: alert.changeState ? false : true})
+        })
     }
 
     useEffect(() => {

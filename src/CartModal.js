@@ -24,7 +24,7 @@ function CartModal({setCartModal}) {
     }
 
     async function deleteCartItem() {
-        const ref = doc(db, keyDelete.id)
+        const ref = doc(db, 'CartItems' , keyDelete.id)
         await deleteDoc(ref).then(() => {
             handleAlert('Delete Successfully!')
             getCart()
@@ -112,7 +112,7 @@ function CartModal({setCartModal}) {
                         <button type="button" className="w-50 btn btn-success" 
                             onClick={() => {setPurchase(true)}}>
                             Purchase</button>
-                        <button type="button" className="w-50 btn btn-danger" 
+                        <button type="button" className="w-50 btn btn-danger"
                             onClick={() => handleClose()}>
                             Cancel</button>
                     </div>
