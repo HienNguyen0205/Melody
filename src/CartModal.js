@@ -25,11 +25,11 @@ function CartModal({setCartModal}) {
     function deleteCartItem() {
         const ref = doc(db, 'CartItems' , keyDelete.id)
         deleteDoc(ref).then(() => {
-            handleAlert('Delete Successfully!')
+            handleAlert({data: 'Delete Successfully!'})
             getCart()
         })
         .catch(() => {
-            handleAlert('Delete Fail!')
+            handleAlert({data: 'Delete Fail!'})
         })
     }
 
