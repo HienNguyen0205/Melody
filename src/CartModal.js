@@ -1,6 +1,6 @@
 import { useState, useEffect, memo} from 'react'
 import { db } from './db'
-import { collection, getDocs, deleteDoc, doc } from 'firebase/firestore'
+import { collection, getDocs, deleteDoc, updateDoc, doc, query, where } from 'firebase/firestore'
 import Message from './Message'
 
 function CartModal({setCartModal}) {
@@ -10,26 +10,36 @@ function CartModal({setCartModal}) {
     const [keyDelete, setKeyDelete] = useState({id: 0})
     const [tickets, setTickets] = useState()
 
-    async function getCart() {
+    function getCart() {
         const ref = collection(db, 'CartItems')
-        await getDocs(ref).then((response) => {
+        getDocs(ref).then((response) => {
             const cart = response.docs.map((doc) => ({
                 id: doc.id,
                 data: doc.data()
             }))
-            console.log(cart)
             setTickets(cart)
         })
         .catch((error) => console.error(error))
     }
 
-    async function deleteCartItem() {
+    function deleteCartItem() {
         const ref = doc(db, 'CartItems' , keyDelete.id)
-        await deleteDoc(ref).then(() => {
+        deleteDoc(ref).then(() => {
             handleAlert('Delete Successfully!')
             getCart()
         })
-        .catch((error) => console.error(error))
+        .catch(() => {
+            handleAlert('Delete Fail!')
+        })
+    }
+
+    async function updateCart() {
+        const q = query(collection(db, 'CartItems'), where("isPurchased", "==" , false))
+        const snapshot = await getDocs(q)
+        snapshot.forEach(item => {
+            const ref = doc(db, 'CartItems', item.id)
+            updateDoc(ref, {isPurchased: true})
+        })
     }
 
     useEffect(() => {
@@ -41,12 +51,9 @@ function CartModal({setCartModal}) {
             deleteCartItem()
         }
         if(purchase){
-            db.collection('CartItems').get().then((snapshot) => {
-                return Promise.all(snapshot.documents.map(doc => {
-                  return doc.ref.update({isPurchase: true})
-                }))
-            })
-            handleAlert("Purchase Successfully!")
+            updateCart()
+            getCart()
+            handleAlert({data: "Purchase successfully!"})
             setPurchase(false)
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -91,19 +98,23 @@ function CartModal({setCartModal}) {
                             </thead>
                             <tbody>
                                 {Array.isArray(tickets) && tickets.map(ticket => {
-                                    return (
-                                        <tr key={ticket.id}>
-                                            <td>{ticket.data.name}</td>
-                                            <td>{ticket.data.email}</td>
-                                            <td>{ticket.data.price}</td>
-                                            <td>{ticket.data.number}</td>
-                                            <td>
-                                                <button type="button" className="btn btn-danger" 
-                                                    onClick={() => handleDelete(ticket.id)}>
-                                                    Delete</button>
-                                            </td>
-                                        </tr>
-                                    )
+                                    if(!ticket.data.isPurchased){
+                                        return (
+                                            <tr key={ticket.id}>
+                                                <td>{ticket.data.name}</td>
+                                                <td>{ticket.data.email}</td>
+                                                <td>{ticket.data.price}</td>
+                                                <td>{ticket.data.number}</td>
+                                                <td>
+                                                    <button type="button" className="btn btn-danger" 
+                                                        onClick={() => handleDelete(ticket.id)}>
+                                                        Delete</button>
+                                                </td>
+                                            </tr>
+                                        )
+                                    }else{
+                                        return null
+                                    }
                                 })}
                             </tbody>
                         </table>
