@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { ParallaxProvider } from 'react-scroll-parallax'
 import Header from './Header'
 import Home from './Home'
 import Performer from './Performer'
@@ -25,7 +26,7 @@ function App(){
   })
 
   return (
-    <>
+    <ParallaxProvider>
       <Header innerRef={ref}/>
       <Home/>
       <Performer height={height}/>
@@ -33,7 +34,7 @@ function App(){
       <Ticket height={height}/>
       <About height={height}/>
       <Footer/>
-    </>
+    </ParallaxProvider>
   )
 }
 

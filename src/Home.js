@@ -22,6 +22,7 @@ const goDown = () => {
 }
 
 function Home(){
+
     return (
         <div id="home" className="slide-container">
             <Slide>

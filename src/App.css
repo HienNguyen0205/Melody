@@ -73,6 +73,7 @@ hr{
 
 .nav-link{
     color: var(--text-color) !important;
+    cursor: pointer;
 }
 
 .icon{
@@ -148,9 +149,6 @@ hr{
 
 #performer{
     min-height: 100vh;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: cover;
 }
 
 #performer-title,

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, memo } from "react"
+import { useParallax } from 'react-scroll-parallax'
 import TicketModal from './TicketModal'
 import CartModal from './CartModal'
 
@@ -26,6 +27,16 @@ function Ticket({height}){
 
     const styles = {'marginTop': `${-height}px`, 'paddingTop': `${height}px`}
 
+    const ticket1 = useParallax({
+        translateX: [-12, 0],
+        opacity: [0.8 ,1],
+    })
+
+    const ticket2 = useParallax({
+        translateX: [12, 0],
+        opacity: [0.8 ,1],
+    })
+
     return (
         <div id="ticket" style={styles}>
             <div className="container">
@@ -36,7 +47,7 @@ function Ticket({height}){
                 </div>
                 <div className="row">
                     <div className="col-lg-4 col-md-4 col-sm-12">
-                        <div className="ticket-container">
+                        <div className="ticket-container" ref={ticket1.ref}>
                             <div className="ticket-wrap">
                                 <div className="ticket-title text-center my-3">
                                     <h2>$599</h2>
@@ -64,7 +75,7 @@ function Ticket({height}){
                         </div>
                     </div>
                     <div className="col-lg-4 col-md-4 col-sm-12">
-                        <div className="ticket-container">
+                        <div className="ticket-container" ref={ticket2.ref}>
                             <div className="ticket-wrap">
                                 <div className="ticket-title text-center my-3">
                                     <h2>$799</h2>
